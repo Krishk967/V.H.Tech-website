@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Phone, Mail, MessageCircle, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import logo from "@/assets/logo.jpg";
 
 export const Navbar = () => {
   const location = useLocation();
@@ -52,8 +53,8 @@ export const Navbar = () => {
       {/* Main Navigation */}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-2xl font-bold text-primary">
-            V H Tech
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="V H Tech - Undercarriage Parts" className="h-12 md:h-14" />
           </Link>
 
           {/* Desktop Navigation */}

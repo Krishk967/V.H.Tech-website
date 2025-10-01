@@ -1,9 +1,21 @@
 import { Phone, Mail, MessageCircle, Instagram, Facebook } from "lucide-react";
 import { Link } from "react-router-dom";
+import vehiclesImage from "@/assets/vehicles.png";
 
 export const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground mt-20">
+      {/* Decorative Vehicle Banner */}
+      <div className="bg-secondary/20 py-4 border-b border-primary-foreground/10">
+        <div className="container mx-auto px-4">
+          <img 
+            src={vehiclesImage} 
+            alt="Heavy Equipment Vehicles" 
+            className="w-full max-w-6xl mx-auto opacity-70"
+          />
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}

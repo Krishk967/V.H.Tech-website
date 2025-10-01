@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, CheckCircle2, Settings, Cog, Wrench } from "lucide-react";
 import heroImage from "@/assets/hero-machinery.jpg";
+import partsDiagram from "@/assets/parts-diagram.jpg";
+import partsLabeled from "@/assets/parts-labeled.jpg";
+import brandsImage from "@/assets/brands.png";
 
 export default function Home() {
   const products = [
@@ -78,24 +81,45 @@ export default function Home() {
 
       {/* About Section */}
       <section className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-primary">
             About V H Tech
           </h2>
-          <div className="prose prose-lg max-w-none text-muted-foreground">
-            <p className="text-lg leading-relaxed mb-4">
-              Undercarriages and parts in crawler or track-mounted equipment play an important role in
-              the mobility of the whole equipment and its uptime.
-            </p>
-            <p className="text-lg leading-relaxed mb-4">
-              Undercarriage parts are small and simple, but when all put together, support the entire
-              track system. The major undercarriage components include links, pins, bushings, sprockets,
-              rollers, idlers, shoes and frames.
-            </p>
-            <p className="text-lg leading-relaxed">
-              We supply the best quality parts pan India. We provide almost each and every company's
-              compatible parts. Export quality parts are being provided by us.
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-12">
+            <div className="prose prose-lg max-w-none text-muted-foreground">
+              <p className="text-lg leading-relaxed mb-4">
+                Undercarriages and parts in crawler or track-mounted equipment play an important role in
+                the mobility of the whole equipment and its uptime.
+              </p>
+              <p className="text-lg leading-relaxed mb-4">
+                Undercarriage parts are small and simple, but when all put together, support the entire
+                track system. The major undercarriage components include links, pins, bushings, sprockets,
+                rollers, idlers, shoes and frames.
+              </p>
+              <p className="text-lg leading-relaxed">
+                We supply the best quality parts pan India. We provide almost each and every company's
+                compatible parts. Export quality parts are being provided by us.
+              </p>
+            </div>
+            <div className="order-first lg:order-last">
+              <img 
+                src={partsDiagram} 
+                alt="Excavator Undercarriage Parts Diagram" 
+                className="w-full rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+
+          {/* Parts Breakdown Image */}
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold text-center mb-6 text-primary">
+              Undercarriage Components Explained
+            </h3>
+            <img 
+              src={partsLabeled} 
+              alt="Detailed Undercarriage Parts with Labels" 
+              className="w-full max-w-4xl mx-auto rounded-lg shadow-lg"
+            />
           </div>
         </div>
       </section>
@@ -116,6 +140,25 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Compatible Brands Section */}
+      <section className="bg-secondary py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-primary">
+            Compatible with Major Brands
+          </h2>
+          <p className="text-center text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            We supply high-quality compatible parts for all leading heavy equipment manufacturers
+          </p>
+          <div className="max-w-5xl mx-auto bg-background rounded-lg p-8 shadow-md">
+            <img 
+              src={brandsImage} 
+              alt="Compatible Brands: Caterpillar, Hitachi, Komatsu, Kobelco, Doosan, Hyundai, Volvo, Sumitomo, Sany, Tata Hitachi" 
+              className="w-full"
+            />
           </div>
         </div>
       </section>
