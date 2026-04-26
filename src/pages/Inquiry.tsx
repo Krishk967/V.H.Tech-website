@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,64 +14,126 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
+const products = [
+  "Track Guard",
+  "Track Shoe Plate",
+  "Track Link Assembly",
+  "Sprocket",
+  "Carrier Roller",
+  "Track Roller",
+  "Idler",
+  "Spring Assembly",
+  "Bucket Bushing and Pin",
+  "Yoke, Track Bolt and Shim",
+  "Other",
+] as const;
+
+const NAME_MAX = 100;
+const EMAIL_MAX = 255;
+const COMMENTS_MAX = 1000;
+
+const inquirySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: "Name must be at least 2 characters" })
+    .max(NAME_MAX, { message: `Name must be less than ${NAME_MAX} characters` }),
+  email: z
+    .string()
+    .trim()
+    .email({ message: "Please enter a valid email address" })
+    .max(EMAIL_MAX, { message: `Email must be less than ${EMAIL_MAX} characters` }),
+  phone: z
+    .string()
+    .trim()
+    .min(10, { message: "Phone number must be at least 10 digits" })
+    .max(20, { message: "Phone number is too long" })
+    .regex(/^\+?[0-9\s\-()]{10,20}$/, {
+      message: "Please enter a valid phone number (digits, spaces, +, -, () allowed)",
+    }),
+  product: z.enum(products, {
+    errorMap: () => ({ message: "Please select a product" }),
+  }),
+  comments: z
+    .string()
+    .trim()
+    .max(COMMENTS_MAX, { message: `Comments must be less than ${COMMENTS_MAX} characters` })
+    .optional()
+    .or(z.literal("")),
+});
+
+type FormData = {
+  name: string;
+  email: string;
+  phone: string;
+  product: string;
+  comments: string;
+};
+
+type FormErrors = Partial<Record<keyof FormData, string>>;
+
 export default function Inquiry() {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     phone: "",
     product: "",
     comments: "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const products = [
-    "Track Guard",
-    "Track Shoe Plate",
-    "Track Link Assembly",
-    "Sprocket",
-    "Carrier Roller",
-    "Track Roller",
-    "Idler",
-    "Spring Assembly",
-    "Bucket Bushing and Pin",
-    "Yoke, Track Bolt and Shim",
-    "Other",
-  ];
+  const updateField = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Create WhatsApp message
-    const message = `
-*New Inquiry from V H Tech Website*
+    const result = inquirySchema.safeParse(formData);
 
-*Name:* ${formData.name}
-*Email:* ${formData.email}
-*Phone:* ${formData.phone}
-*Product Required:* ${formData.product}
+    if (!result.success) {
+      const fieldErrors: FormErrors = {};
+      result.error.issues.forEach((issue) => {
+        const key = issue.path[0] as keyof FormData;
+        if (key && !fieldErrors[key]) {
+          fieldErrors[key] = issue.message;
+        }
+      });
+      setErrors(fieldErrors);
+      toast({
+        title: "Please fix the errors below",
+        description: "Some fields contain invalid information.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const data = result.data;
+
+    const message = `*New Inquiry from V H Tech Website*
+
+*Name:* ${data.name}
+*Email:* ${data.email}
+*Phone:* ${data.phone}
+*Product Required:* ${data.product}
 
 *Comments:*
-${formData.comments}
-    `.trim();
+${data.comments || "N/A"}`.trim();
 
-    const whatsappUrl = `https://wa.me/9824235838?text=${encodeURIComponent(message)}`;
-    
-    // Open WhatsApp
-    window.open(whatsappUrl, "_blank");
+    const whatsappUrl = `https://wa.me/919824235838?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
 
     toast({
       title: "Redirecting to WhatsApp",
       description: "Your inquiry will be sent via WhatsApp",
     });
 
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      product: "",
-      comments: "",
-    });
+    setFormData({ name: "", email: "", phone: "", product: "", comments: "" });
+    setErrors({});
   };
 
   return (
@@ -95,35 +158,55 @@ ${formData.comments}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">
-                  Name <span className="text-destructive">*</span>
-                </Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="name">
+                    Name <span className="text-destructive">*</span>
+                  </Label>
+                  <span className="text-xs text-muted-foreground">
+                    {formData.name.length}/{NAME_MAX}
+                  </span>
+                </div>
                 <Input
                   id="name"
                   type="text"
                   required
+                  maxLength={NAME_MAX}
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => updateField("name", e.target.value)}
                   placeholder="Enter your full name"
+                  aria-invalid={!!errors.name}
                 />
+                {errors.name && (
+                  <p className="text-sm font-medium text-destructive">{errors.name}</p>
+                )}
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">
-                  Email <span className="text-destructive">*</span>
-                </Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="email">
+                    Email <span className="text-destructive">*</span>
+                  </Label>
+                  <span className="text-xs text-muted-foreground">
+                    {formData.email.length}/{EMAIL_MAX}
+                  </span>
+                </div>
                 <Input
                   id="email"
                   type="email"
                   required
+                  maxLength={EMAIL_MAX}
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) => updateField("email", e.target.value)}
                   placeholder="your.email@example.com"
+                  aria-invalid={!!errors.email}
                 />
+                {errors.email && (
+                  <p className="text-sm font-medium text-destructive">{errors.email}</p>
+                )}
               </div>
 
               {/* Phone */}
@@ -135,10 +218,15 @@ ${formData.comments}
                   id="phone"
                   type="tel"
                   required
+                  maxLength={20}
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => updateField("phone", e.target.value)}
                   placeholder="+91 XXXXXXXXXX"
+                  aria-invalid={!!errors.phone}
                 />
+                {errors.phone && (
+                  <p className="text-sm font-medium text-destructive">{errors.phone}</p>
+                )}
               </div>
 
               {/* Product */}
@@ -148,10 +236,9 @@ ${formData.comments}
                 </Label>
                 <Select
                   value={formData.product}
-                  onValueChange={(value) => setFormData({ ...formData, product: value })}
-                  required
+                  onValueChange={(value) => updateField("product", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger aria-invalid={!!errors.product}>
                     <SelectValue placeholder="Select a product" />
                   </SelectTrigger>
                   <SelectContent>
@@ -162,18 +249,31 @@ ${formData.comments}
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.product && (
+                  <p className="text-sm font-medium text-destructive">{errors.product}</p>
+                )}
               </div>
 
               {/* Comments */}
               <div className="space-y-2">
-                <Label htmlFor="comments">Additional Comments</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="comments">Additional Comments</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {formData.comments.length}/{COMMENTS_MAX}
+                  </span>
+                </div>
                 <Textarea
                   id="comments"
+                  maxLength={COMMENTS_MAX}
                   value={formData.comments}
-                  onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+                  onChange={(e) => updateField("comments", e.target.value)}
                   placeholder="Please provide any additional details about your requirement..."
                   rows={5}
+                  aria-invalid={!!errors.comments}
                 />
+                {errors.comments && (
+                  <p className="text-sm font-medium text-destructive">{errors.comments}</p>
+                )}
               </div>
 
               {/* Submit Button */}
